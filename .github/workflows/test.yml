@@ -7,16 +7,13 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to EC2
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code from GitHub
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ SSH into EC2 and deploy
-      - name: SSH into EC2 and deploy Next.js
+      - name: SSH into EC2 and deploy
         uses: appleboy/ssh-action@v1
         with:
           host: ec2-13-126-63-148.ap-south-1.compute.amazonaws.com
@@ -24,29 +21,32 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
-            # Load nvm so node/npm are available
+            # Load NVM (important for npm/node)
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-            # Create the project folder if it doesn't exist
-            mkdir -p ~/ci-cd-test
-            cd ~/ci-cd-test
+            cd ~
 
-            # If folder exists but not a git repo, clean it and clone fresh
-            if [ ! -d ".git" ]; then
-              echo "Folder exists but no git repo. Cleaning and cloning..."
-              rm -rf ./*
-              git clone https://github.com/lalitbgs2584-cell/CI-CD-Pipeline/ .
-            else
-              # Reset and clean repo, then pull latest changes
-              git reset --hard
-              git clean -fd
+            # Clone or update repo
+            if [ -d "CI-CD-Pipeline/.git" ]; then
+              cd CI-CD-Pipeline
               git pull origin main
+            else
+              git clone https://github.com/lalitbgs2584-cell/CI-CD-Pipeline.git
+              cd CI-CD-Pipeline
             fi
 
-            # Install dependencies and build Next.js app
+            # 🔥 Move into Next.js app directory
+            cd ci-cd-test
+
+            # Debug check
+            pwd
+            ls
+            cat package.json
+
+            # Install & build
             npm install
             npm run build
 
-            # Start the Next.js app in production
+            # Start Next.js (port 3000)
             npm run start
