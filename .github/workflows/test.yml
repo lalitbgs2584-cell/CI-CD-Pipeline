@@ -22,13 +22,27 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
-            # 1️⃣ Load nvm for Node/npm/pm2
+            # 1️⃣ Load nvm
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-            cd ci-cd-test
-            git pull
+            # 2️⃣ Create folder if it doesn't exist
+            mkdir -p ~/ci-cd-test
+            cd ~/ci-cd-test
+
+            # 3️⃣ Clone repo if empty, else pull latest
+            if [ -d ".git" ]; then
+              git pull origin main
+            else
+              git clone https://github.com/lalitbgs2584-cell/CI-CD-Pipeline/ .
+            fi
+
+            # 4️⃣ Install dependencies and build
             npm install
             npm run build
-            npm run start
-            
+
+            # 5️⃣ Start app using PM2
+            pm2 restart app || pm2 start index.js --name app
+
+            # 6️⃣ Save PM2 process list so it restarts on reboot
+            pm2 save
