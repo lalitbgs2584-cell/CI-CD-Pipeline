@@ -37,12 +37,9 @@ jobs:
               git clone https://github.com/lalitbgs2584-cell/CI-CD-Pipeline/ .
             fi
 
-            # 4️⃣ Install dependencies and build
+            # 4️⃣ Install dependencies and build Next.js app
             npm install
             npm run build
 
-            # 5️⃣ Start app using PM2
-            pm2 restart app || pm2 start index.js --name app
-
-            # 6️⃣ Save PM2 process list so it restarts on reboot
-            pm2 save
+            # 5️⃣ Start the Next.js app directly
+            npm run start
