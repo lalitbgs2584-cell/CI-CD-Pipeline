@@ -11,7 +11,7 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero Section for landing */}
       <section className="flex flex-col items-center text-center px-6 py-24 max-w-4xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold leading-tight">
           Build smarter. <span className="text-blue-600">Grow faster.</span>
