@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout your repository
+      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -28,7 +28,10 @@ jobs:
             # Go to home directory
             cd ~
 
-            # Clone or update repo
+            # Add Node.js to PATH
+            export PATH=/home/ubuntu/.nvm/versions/node/v22.22.0/bin:$PATH
+
+            # Clone or update repository
             if [ -d "CI-CD-Pipeline/.git" ]; then
               cd CI-CD-Pipeline
               git reset --hard
@@ -38,15 +41,15 @@ jobs:
               cd CI-CD-Pipeline
             fi
 
-            # Go into Next.js app
+            # Go into Next.js app folder
             cd ci-cd-test
 
-            # Install dependencies & build app using full path to npm
-            /home/ubuntu/.nvm/versions/node/v22.22.0/bin/npm ci
-            /home/ubuntu/.nvm/versions/node/v22.22.0/bin/npm run build
+            # Install dependencies & build app
+            npm ci
+            npm run build
 
             # Kill old Next.js process (if any)
             pkill -f "next start" || true
 
             # Start app in background using nohup
-            nohup /home/ubuntu/.nvm/versions/node/v22.22.0/bin/npm run start > app.log 2>&1 &
+            nohup npm run start > app.log 2>&1 &
