@@ -41,12 +41,12 @@ jobs:
             # Go into Next.js app
             cd ci-cd-test
 
-            # Install dependencies & build app
-            npm ci
-            npm run build
+            # Install dependencies & build app using full path to npm
+            /home/ubuntu/.nvm/versions/node/v22.22.0/bin/npm ci
+            /home/ubuntu/.nvm/versions/node/v22.22.0/bin/npm run build
 
             # Kill old Next.js process (if any)
             pkill -f "next start" || true
 
             # Start app in background using nohup
-            nohup npm run start > app.log 2>&1 &
+            nohup /home/ubuntu/.nvm/versions/node/v22.22.0/bin/npm run start > app.log 2>&1 &
