@@ -24,15 +24,15 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
-            # Load nvm so node, npm are available
+            # Load nvm so node/npm are available
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-            # Navigate to the project folder
+            # Create the project folder if it doesn't exist
             mkdir -p ~/ci-cd-test
             cd ~/ci-cd-test
 
-            # If folder exists but not a git repo, remove and clone fresh
+            # If folder exists but not a git repo, clean it and clone fresh
             if [ ! -d ".git" ]; then
               echo "Folder exists but no git repo. Cleaning and cloning..."
               rm -rf ./*
