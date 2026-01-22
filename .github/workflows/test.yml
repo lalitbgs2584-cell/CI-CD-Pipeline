@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: SSH into EC2 and deploy
+      - name: Deploy on EC2
         uses: appleboy/ssh-action@v1
         with:
           host: ec2-13-126-63-148.ap-south-1.compute.amazonaws.com
@@ -21,9 +21,11 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
-            # Load NVM (important for npm/node)
+            set -e
+
+            # Load NVM
             export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
             cd ~
 
@@ -36,17 +38,15 @@ jobs:
               cd CI-CD-Pipeline
             fi
 
-            # 🔥 Move into Next.js app directory
+            # Go into Next.js app
             cd ci-cd-test
-
-            # Debug check
-            pwd
-            ls
-            cat package.json
 
             # Install & build
             npm install
             npm run build
 
-            # Start Next.js (port 3000)
-            npm run start
+            # Kill old Next.js process (if any)
+            pkill -f "next start" || true
+
+            # Start app in background (IMPORTANT)
+            nohup npm run start > app.log 2>&1 &
