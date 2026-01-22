@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: Deploy Next.js to EC2
 
 on:
   push:
@@ -7,14 +7,16 @@ on:
 
 jobs:
   deploy:
-    name: Push to EC2
+    name: Deploy to EC2
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout code from GitHub
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: SSH into EC2 and deploy
+      # 2️⃣ SSH into EC2 and deploy
+      - name: SSH into EC2 and deploy Next.js
         uses: appleboy/ssh-action@v1
         with:
           host: ec2-13-126-63-148.ap-south-1.compute.amazonaws.com
@@ -22,24 +24,29 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
-            # 1️⃣ Load nvm
+            # Load nvm so node, npm are available
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-            # 2️⃣ Create folder if it doesn't exist
+            # Navigate to the project folder
             mkdir -p ~/ci-cd-test
             cd ~/ci-cd-test
 
-            # 3️⃣ Clone repo if empty, else pull latest
-            if [ -d ".git" ]; then
-              git pull origin main
-            else
+            # If folder exists but not a git repo, remove and clone fresh
+            if [ ! -d ".git" ]; then
+              echo "Folder exists but no git repo. Cleaning and cloning..."
+              rm -rf ./*
               git clone https://github.com/lalitbgs2584-cell/CI-CD-Pipeline/ .
+            else
+              # Reset and clean repo, then pull latest changes
+              git reset --hard
+              git clean -fd
+              git pull origin main
             fi
 
-            # 4️⃣ Install dependencies and build Next.js app
+            # Install dependencies and build Next.js app
             npm install
             npm run build
 
-            # 5️⃣ Start the Next.js app directly
+            # Start the Next.js app in production
             npm run start
