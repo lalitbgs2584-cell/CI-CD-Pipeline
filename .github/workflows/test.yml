@@ -14,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Deploy on EC2
+      # Step 2: Deploy on EC2 using PM2 for background process
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1
         with:
@@ -22,8 +22,9 @@ jobs:
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
+          command_timeout: 15m  # Extended timeout for safety [web:5][web:18]
           script: |
-            set -e
+            set -e  # Exit on any error
 
             # Go to home directory
             cd ~
@@ -48,8 +49,8 @@ jobs:
             npm ci
             npm run build
 
-            # Kill old Next.js process (if any)
-            pkill -f "next start" || true
-
-            # Start app in background using nohup
-            nohup npm run start > app.log 2>&1 &
+            # Manage app with PM2 (installs globally if missing)
+            pm2 del next-app || true
+            pm2 start npm --name next-app -- start -- -p 3000
+            pm2 save
+            pm2 startup  # Setup auto-restart on boot (run once)
